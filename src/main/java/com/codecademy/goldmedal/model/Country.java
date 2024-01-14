@@ -1,8 +1,10 @@
 package com.codecademy.goldmedal.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import java.beans.ConstructorProperties;
 import java.math.BigDecimal;
 
 @Entity
@@ -10,12 +12,10 @@ public class Country {
     @Id
     @GeneratedValue
     private Long id;
-
     private String name;
     private String code;
     private BigDecimal gdp;
     private Integer population;
-
     public Country() {
     }
 

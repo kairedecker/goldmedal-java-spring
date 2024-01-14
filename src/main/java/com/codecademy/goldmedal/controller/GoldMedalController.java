@@ -1,20 +1,25 @@
 package com.codecademy.goldmedal.controller;
 
 import com.codecademy.goldmedal.model.*;
+import com.codecademy.goldmedal.repositories.CountryRepository;
+import com.codecademy.goldmedal.repositories.GoldMedalRepository;
 import org.apache.commons.text.WordUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/countries")
 public class GoldMedalController {
-    // TODO: declare references to your repositories
+    final GoldMedalRepository goldMedalRepository;
+    final CountryRepository countryRepository;
 
-    // TODO: update your constructor to include your repositories
-    public GoldMedalController() {
+    public GoldMedalController(GoldMedalRepository goldMedalRepository, CountryRepository countryRepository) {
+        this.goldMedalRepository = goldMedalRepository;
+        this.countryRepository = countryRepository;
     }
 
     @GetMapping
@@ -40,19 +45,19 @@ public class GoldMedalController {
         List<GoldMedal> medalsList;
         switch (sortBy) {
             case "year":
-                medalsList = // TODO: list of medals sorted by year in the given order
+                medalsList = ascendingOrder ? this.goldMedalRepository.findAllByOrderByYearAsc() : this.goldMedalRepository.findAllByOrderByYearDesc();
                 break;
             case "season":
-                medalsList = // TODO: list of medals sorted by season in the given order
+                medalsList = ascendingOrder ? this.goldMedalRepository.findAllByOrderBySeasonAsc() : this.goldMedalRepository.findAllByOrderBySeasonDesc();
                 break;
             case "city":
-                medalsList = // TODO: list of medals sorted by city in the given order
+                medalsList = ascendingOrder ? this.goldMedalRepository.findAllByOrderByCityAsc() : this.goldMedalRepository.findAllByOrderByCityDesc();
                 break;
             case "name":
-                medalsList = // TODO: list of medals sorted by athlete's name in the given order
+                medalsList = ascendingOrder ? this.goldMedalRepository.findAllByOrderByNameAsc() : this.goldMedalRepository.findAllByOrderByNameDesc();
                 break;
             case "event":
-                medalsList = // TODO: list of medals sorted by event in the given order
+                medalsList = ascendingOrder ? this.goldMedalRepository.findAllByOrderByEventAsc() : this.goldMedalRepository.findAllByOrderByEventDesc();
                 break;
             default:
                 medalsList = new ArrayList<>();
@@ -63,28 +68,36 @@ public class GoldMedalController {
     }
 
     private CountryDetailsResponse getCountryDetailsResponse(String countryName) {
-        var countryOptional = // TODO: get the country; this repository method should return a java.util.Optional
+        // get the country; this repository method should return a java.util.Optional
+        Optional<Country> countryOptional = this.countryRepository.findByName(countryName);
         if (countryOptional.isEmpty()) {
             return new CountryDetailsResponse(countryName);
         }
 
         var country = countryOptional.get();
-        var goldMedalCount = // TODO: get the medal count
+        var goldMedalCount = this.goldMedalRepository.countByCountry(country.getName());
 
-        var summerWins = // TODO: get the collection of wins at the Summer Olympics, sorted by year in ascending order
-        var numberSummerWins = summerWins.size() > 0 ? summerWins.size() : null;
-        var totalSummerEvents = // TODO: get the total number of events at the Summer Olympics
+        // get the collection of wins at the Summer Olympics, sorted by year in ascending order
+        var summerWins = this.goldMedalRepository.findByCountryAndSeasonOrderByYearAsc(countryName, "Summer");
+        var numberSummerWins = !summerWins.isEmpty() ? summerWins.size() : null;
+        // get the total number of events at the Summer Olympics
+        var totalSummerEvents = this.goldMedalRepository.countBySeason("Summer");
         var percentageTotalSummerWins = totalSummerEvents != 0 && numberSummerWins != null ? (float) summerWins.size() / totalSummerEvents : null;
-        var yearFirstSummerWin = summerWins.size() > 0 ? summerWins.get(0).getYear() : null;
+        var yearFirstSummerWin = !summerWins.isEmpty() ? summerWins.get(0).getYear() : null;
 
-        var winterWins = // TODO: get the collection of wins at the Winter Olympics
-        var numberWinterWins = winterWins.size() > 0 ? winterWins.size() : null;
-        var totalWinterEvents = // TODO: get the total number of events at the Winter Olympics, sorted by year in ascending order
+        // get the collection of wins at the Winter Olympics
+        var winterWins = this.goldMedalRepository.findByCountryAndSeasonOrderByYearAsc(countryName, "Winter");
+        var numberWinterWins = !winterWins.isEmpty() ? winterWins.size() : null;
+
+        // get the total number of events at the Winter Olympics, sorted by year in ascending order
+        var totalWinterEvents = this.goldMedalRepository.countBySeason("Winter");
         var percentageTotalWinterWins = totalWinterEvents != 0 && numberWinterWins != null ? (float) winterWins.size() / totalWinterEvents : null;
-        var yearFirstWinterWin = winterWins.size() > 0 ? winterWins.get(0).getYear() : null;
+        var yearFirstWinterWin = !winterWins.isEmpty() ? winterWins.get(0).getYear() : null;
 
-        var numberEventsWonByFemaleAthletes = // TODO: get the number of wins by female athletes
-        var numberEventsWonByMaleAthletes = // TODO: get the number of wins by male athletes
+        // get the number of wins by female athletes
+        var numberEventsWonByFemaleAthletes = this.goldMedalRepository.countByGender("Women");
+        // get the number of wins by male athletes
+        var numberEventsWonByMaleAthletes = this.goldMedalRepository.countByGender("Men");
 
         return new CountryDetailsResponse(
                 countryName,
