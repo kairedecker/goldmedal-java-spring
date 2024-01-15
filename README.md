@@ -1,5 +1,5 @@
 # Gold Medal Metrics Challenge Project
-A Codecademy Projekt for learning Java Spring Boot.
+A Codecademy project for learning Java Spring Boot.
 
 ### Overview
 In this project, you will use Spring Data JPA to power an Olympics analytics web app.
